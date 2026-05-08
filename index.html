@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Gate Operations Simulator — Physics Project</title>
+  <meta name="description" content="Interactive simulation of single-qubit quantum gates including Pauli-X, Y, Z and Hadamard with Bloch sphere visualization">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="hero">
+  <h1>⚛ Quantum Gate Operations Simulator</h1>
+  <p>Interactive Simulation of Single-Qubit Quantum Gates and State Transformations</p>
+  <span class="badge">Physics Project</span>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" data-tab="tab-sim" onclick="switchTab('tab-sim')">🔬 Simulator</button>
+  <button class="tab-btn" data-tab="tab-theory" onclick="switchTab('tab-theory')">📖 Theory &amp; Concepts</button>
+  <button class="tab-btn" data-tab="tab-gates" onclick="switchTab('tab-gates')">⚡ Gate Details</button>
+  <button class="tab-btn" data-tab="tab-compare" onclick="switchTab('tab-compare')">🔄 Classical vs Quantum</button>
+</div>
+
+<div class="tab-content active" id="tab-sim">
+
+  <div class="formula-bar">
+    <div class="formula-item"><div class="f-title">Qubit State</div><code>|ψ⟩ = α|0⟩ + β|1⟩</code><br><small>α, β are complex amplitudes</small></div>
+    <div class="formula-item"><div class="f-title">Born Rule</div><code>P(0) = |α|², P(1) = |β|²</code><br><small>Total probability = 1</small></div>
+    <div class="formula-item"><div class="f-title">Gate Action</div><code>|ψ'⟩ = U|ψ⟩</code><br><small>U is a 2×2 unitary matrix</small></div>
+    <div class="formula-item"><div class="f-title">Normalization</div><code>|α|² + |β|² = 1</code><br><small>Always satisfied after gate</small></div>
+  </div>
+
+  <div class="sim-grid">
+    <div class="left-panel">
+      <div class="card">
+        <div class="card-title">Step 1 — Choose Input State |ψ⟩</div>
+        <div class="input-grid">
+          <button class="input-btn active" id="in0" onclick="setInput(0)">|0⟩<small>spin-up / OFF</small></button>
+          <button class="input-btn" id="in1" onclick="setInput(1)">|1⟩<small>spin-down / ON</small></button>
+          <button class="input-btn" id="inp" onclick="setInput(2)">|+⟩<small>superposition +</small></button>
+          <button class="input-btn" id="inm" onclick="setInput(3)">|−⟩<small>superposition −</small></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 2 — Apply a Gate</div>
+        <div class="gate-grid">
+          <button class="gate-btn active" id="gX" onclick="selectGate('X')"><div class="gate-symbol">X</div><div class="gate-label">Pauli-X (NOT)</div></button>
+          <button class="gate-btn" id="gY" onclick="selectGate('Y')"><div class="gate-symbol">Y</div><div class="gate-label">Pauli-Y</div></button>
+          <button class="gate-btn" id="gZ" onclick="selectGate('Z')"><div class="gate-symbol">Z</div><div class="gate-label">Pauli-Z</div></button>
+          <button class="gate-btn" id="gH" onclick="selectGate('H')"><div class="gate-symbol">H</div><div class="gate-label">Hadamard</div></button>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">Gate Matrix (U)</div><div id="matrix-display"></div></div>
+      <div class="card"><div class="card-title">Operation Log</div><div id="step-log"><div class="log-title">> Quantum Terminal</div></div></div>
+    </div>
+    <div class="right-panel">
+      <div class="card">
+        <div class="card-title">Bloch Sphere — Qubit State Visualization</div>
+        <canvas id="bloch" width="700" height="240"></canvas>
+        <p style="font-size:11px;color:#8892a8;text-align:center;margin-top:8px">Every qubit state maps to a point on this sphere. |0⟩ = north pole, |1⟩ = south pole.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Output State |ψ'⟩ — Measurement Probabilities</div>
+        <div class="amp-rows" id="out-state"></div>
+        <div style="margin-top:14px" id="info-text"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Classical Bit vs Quantum Qubit</div>
+        <div class="compare-grid" id="compare-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-theory">
+  <div class="theory-grid">
+
+    <div class="card theory-full">
+      <div class="concept-heading"><span class="concept-number">1</span> What is a Qubit?</div>
+      <div class="theory-text">
+        <p>In classical computing, information is stored in <strong>bits</strong> — each bit is either 0 or 1, like a light switch that is either OFF or ON. There is nothing in between.</p>
+        <br>
+        <p>A <strong>quantum bit (qubit)</strong> is fundamentally different. It can exist in a <strong>superposition</strong> — a combination of both |0⟩ and |1⟩ simultaneously. Mathematically, we write the state of a qubit as:</p>
+        <br>
+        <div class="formula-highlight">|ψ⟩ = α|0⟩ + β|1⟩</div>
+        <br>
+        <p>Here, <strong>α</strong> and <strong>β</strong> are <strong>complex numbers</strong> called <strong>probability amplitudes</strong>. They tell us how much of each basis state is present in the qubit's current state. The key constraint is that the probabilities must always add up to 1:</p>
+        <br>
+        <div class="formula-highlight">|α|² + |β|² = 1</div>
+        <br>
+        <p>This is called the <strong>normalization condition</strong>. It guarantees that when we measure the qubit, we will always get some result — either |0⟩ or |1⟩.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="concept-heading"><span class="concept-number">2</span> Measurement &amp; the Born Rule</div>
+      <div class="theory-text">
+        <p>While a qubit can exist in superposition, <strong>we can never directly observe the superposition</strong>. When we measure a qubit, it instantaneously "collapses" to either |0⟩ or |1⟩.</p>
+        <br>
+        <p>The <strong>Born Rule</strong> tells us the probability of each outcome:</p>
+        <br>
+        <div class="formula-highlight">P(0) = |α|²</div>
+        <div class="formula-highlight">P(1) = |β|²</div>
+        <br>
+        <p><strong>Example:</strong> If a qubit is in state <code style="background:#1a2234;padding:2px 8px;border-radius:4px;font-family:JetBrains Mono,monospace">|ψ⟩ = (1/√2)|0⟩ + (1/√2)|1⟩</code>, then P(0) = |1/√2|² = 1/2 = 50%, and P(1) = 50%. This is the famous <strong>equal superposition</strong>.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="concept-heading"><span class="concept-number">3</span> What are Quantum Gates?</div>
+      <div class="theory-text">
+        <p>Just as classical computers use <strong>logic gates</strong> (AND, OR, NOT) to manipulate bits, quantum computers use <strong>quantum gates</strong> to manipulate qubits.</p>
+        <br>
+        <p>Every single-qubit quantum gate is represented by a <strong>2×2 unitary matrix U</strong>. Applying a gate to a qubit means multiplying:</p>
+        <br>
+        <div class="formula-highlight">|ψ'⟩ = U × |ψ⟩</div>
+        <br>
+        <p>The matrix U must be <strong>unitary</strong> (U†U = I), which guarantees that probabilities are always preserved — they still sum to 1 after any gate operation.</p>
+      </div>
+    </div>
+
+    <div class="card theory-full">
+      <div class="concept-heading"><span class="concept-number">4</span> The Bloch Sphere</div>
+      <div class="theory-text">
+        <p>The <strong>Bloch Sphere</strong> is a geometric representation where every possible state of a single qubit maps to a unique point on the surface of a unit sphere.</p>
+        <br>
+        <p>The state |ψ⟩ = α|0⟩ + β|1⟩ can be parameterized by two angles (θ, φ):</p>
+        <br>
+        <div class="formula-highlight">α = cos(θ/2),  β = e^(iφ) sin(θ/2)</div>
+        <br>
+        <p>This gives us 3D Cartesian coordinates on the sphere:</p>
+        <div class="formula-highlight">x = sin(θ)cos(φ),  y = sin(θ)sin(φ),  z = cos(θ)</div>
+        <br>
+        <p><strong>Key locations:</strong></p>
+        <p>• <strong>North pole</strong> (0, 0, +1) = |0⟩ — the "zero" state</p>
+        <p>• <strong>South pole</strong> (0, 0, −1) = |1⟩ — the "one" state</p>
+        <p>• <strong>Equator</strong> = superposition states (50/50 measurement probability)</p>
+        <p>• (+1, 0, 0) = |+⟩ state, (−1, 0, 0) = |−⟩ state</p>
+        <br>
+        <p>Every quantum gate corresponds to a <strong>rotation of the Bloch vector</strong>. For example, the Pauli-X gate rotates the vector 180° around the X-axis, which swaps the north and south poles (|0⟩ ↔ |1⟩).</p>
+      </div>
+    </div>
+
+    <div class="card theory-full">
+      <div class="concept-heading"><span class="concept-number">5</span> Superposition — The Core of Quantum Computing</div>
+      <div class="theory-text">
+        <p><strong>Superposition</strong> is the property that makes quantum computing fundamentally different from classical computing. While a classical bit can only be 0 OR 1 at any given time, a qubit in superposition is in <strong>both states simultaneously</strong>.</p>
+        <br>
+        <p>This is not just a "we don't know which one it is" situation (that would be classical probability). The qubit genuinely exists in a mathematical combination of both states until measured.</p>
+        <br>
+        <p>The <strong>Hadamard gate</strong> is the primary tool for creating superposition:</p>
+        <div class="formula-highlight">H|0⟩ = (|0⟩ + |1⟩)/√2 = |+⟩</div>
+        <div class="formula-highlight">H|1⟩ = (|0⟩ − |1⟩)/√2 = |−⟩</div>
+        <br>
+        <p>A key property: applying the Hadamard gate <strong>twice</strong> returns the qubit to its original state: <strong>H(H|ψ⟩) = |ψ⟩</strong>. You can verify this in the simulator!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-gates">
+  <div class="theory-grid">
+
+    <div class="card gate-detail-card">
+      <h3>⚡ Pauli-X Gate (Quantum NOT)</h3>
+      <div class="theory-text">
+        <p>The Pauli-X gate is the quantum equivalent of the classical NOT gate. It flips the qubit: |0⟩ becomes |1⟩ and |1⟩ becomes |0⟩.</p><br>
+        <p><strong>Matrix representation:</strong></p>
+        <div class="matrix-small">X = [ 0  1 ]<br>&nbsp;&nbsp;&nbsp;&nbsp;[ 1  0 ]</div>
+        <p><strong>Bloch sphere:</strong> 180° rotation around the X-axis.</p>
+        <div class="example-box">
+          <strong>Step-by-step example:</strong> Apply X to |0⟩<br>
+          <code>X|0⟩ = [0,1; 1,0] × [1; 0] = [0×1+1×0; 1×1+0×0] = [0; 1] = |1⟩</code><br><br>
+          Apply X to |+⟩ = (|0⟩+|1⟩)/√2:<br>
+          <code>X|+⟩ = [1/√2; 1/√2] → [1/√2; 1/√2] = |+⟩</code><br>
+          The |+⟩ state is <strong>unchanged</strong> by X! It's an eigenstate of the X gate.
+        </div>
+      </div>
+    </div>
+
+    <div class="card gate-detail-card">
+      <h3>⚡ Pauli-Y Gate</h3>
+      <div class="theory-text">
+        <p>The Pauli-Y gate combines a bit-flip AND a phase-flip. It has no classical equivalent because classical bits don't have a "phase".</p><br>
+        <p><strong>Matrix representation:</strong></p>
+        <div class="matrix-small">Y = [ 0  −i ]<br>&nbsp;&nbsp;&nbsp;&nbsp;[ i   0 ]</div>
+        <p><strong>Bloch sphere:</strong> 180° rotation around the Y-axis.</p>
+        <div class="example-box">
+          <strong>Step-by-step example:</strong> Apply Y to |0⟩<br>
+          <code>Y|0⟩ = [0,−i; i,0] × [1; 0] = [0; i] = i|1⟩</code><br><br>
+          The result is |1⟩ multiplied by the imaginary unit <strong>i</strong>. This extra factor is a "global phase" — it doesn't affect measurement probabilities (P(1) = |i|² = 1), but it matters when combining with other qubits.
+        </div>
+      </div>
+    </div>
+
+    <div class="card gate-detail-card">
+      <h3>⚡ Pauli-Z Gate (Phase Gate)</h3>
+      <div class="theory-text">
+        <p>The Pauli-Z gate leaves |0⟩ completely unchanged but flips the sign (phase) of |1⟩. Since classical bits have no concept of "phase", this gate has no classical equivalent.</p><br>
+        <p><strong>Matrix representation:</strong></p>
+        <div class="matrix-small">Z = [ 1   0 ]<br>&nbsp;&nbsp;&nbsp;&nbsp;[ 0  −1 ]</div>
+        <p><strong>Bloch sphere:</strong> 180° rotation around the Z-axis.</p>
+        <div class="example-box">
+          <strong>Step-by-step example:</strong> Apply Z to |+⟩ = (|0⟩+|1⟩)/√2<br>
+          <code>Z|+⟩ = [1,0; 0,−1] × [1/√2; 1/√2] = [1/√2; −1/√2] = |−⟩</code><br><br>
+          The Z gate converted |+⟩ into |−⟩! Both have 50/50 measurement probability, but their <strong>phase</strong> is different. This matters in quantum algorithms.
+        </div>
+      </div>
+    </div>
+
+    <div class="card gate-detail-card">
+      <h3>⚡ Hadamard Gate (Superposition Creator)</h3>
+      <div class="theory-text">
+        <p>The Hadamard gate is the most important gate in quantum computing. It creates equal superposition from basis states and is the foundation of quantum parallelism.</p><br>
+        <p><strong>Matrix representation:</strong></p>
+        <div class="matrix-small">H = (1/√2) × [ 1   1 ]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ 1  −1 ]</div>
+        <p><strong>Bloch sphere:</strong> 180° rotation around the X+Z axis (diagonal).</p>
+        <div class="example-box">
+          <strong>Step-by-step example:</strong> Apply H to |0⟩<br>
+          <code>H|0⟩ = (1/√2)[1,1; 1,−1] × [1; 0]</code><br>
+          <code>     = (1/√2)[1; 1] = (1/√2)|0⟩ + (1/√2)|1⟩ = |+⟩</code><br><br>
+          <strong>Key property — H is self-inverse:</strong><br>
+          <code>H(H|0⟩) = H|+⟩ = (1/√2)[1,1;1,−1] × [1/√2; 1/√2]</code><br>
+          <code>        = (1/√2)[2/√2; 0] = [1; 0] = |0⟩ ✓</code><br>
+          Applying H twice returns you to the original state!
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="tab-content" id="tab-compare">
+  <div class="theory-grid">
+
+    <div class="card theory-full">
+      <div class="concept-heading"><span class="concept-number">⚖</span> Classical Bit vs Quantum Qubit — Complete Comparison</div>
+      <div class="theory-text">
+        <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:14px">
+          <tr style="border-bottom:1px solid #2a3450">
+            <th style="text-align:left;padding:10px;color:#a5b4fc">Property</th>
+            <th style="text-align:left;padding:10px;color:#60a5fa">Classical Bit</th>
+            <th style="text-align:left;padding:10px;color:#4ade80">Quantum Qubit</th>
+          </tr>
+          <tr style="border-bottom:1px solid #2a3450">
+            <td style="padding:10px;color:#e2e8f0"><strong>Possible values</strong></td>
+            <td style="padding:10px;color:#8892a8">Only 0 or 1</td>
+            <td style="padding:10px;color:#8892a8">α|0⟩ + β|1⟩ (infinite possibilities)</td>
+          </tr>
+          <tr style="border-bottom:1px solid #2a3450">
+            <td style="padding:10px;color:#e2e8f0"><strong>Superposition</strong></td>
+            <td style="padding:10px;color:#8892a8">❌ Not possible</td>
+            <td style="padding:10px;color:#8892a8">✅ Can be in both states simultaneously</td>
+          </tr>
+          <tr style="border-bottom:1px solid #2a3450">
+            <td style="padding:10px;color:#e2e8f0"><strong>Measurement</strong></td>
+            <td style="padding:10px;color:#8892a8">Always gives same value</td>
+            <td style="padding:10px;color:#8892a8">Probabilistic — collapses to 0 or 1</td>
+          </tr>
+          <tr style="border-bottom:1px solid #2a3450">
+            <td style="padding:10px;color:#e2e8f0"><strong>NOT operation</strong></td>
+            <td style="padding:10px;color:#8892a8">0→1, 1→0 (deterministic)</td>
+            <td style="padding:10px;color:#8892a8">X gate: flips + may create interference</td>
+          </tr>
+          <tr style="border-bottom:1px solid #2a3450">
+            <td style="padding:10px;color:#e2e8f0"><strong>Phase</strong></td>
+            <td style="padding:10px;color:#8892a8">❌ No concept of phase</td>
+            <td style="padding:10px;color:#8892a8">✅ Phase carries quantum information</td>
+          </tr>
+          <tr style="border-bottom:1px solid #2a3450">
+            <td style="padding:10px;color:#e2e8f0"><strong>Visualization</strong></td>
+            <td style="padding:10px;color:#8892a8">Binary: just 0 or 1</td>
+            <td style="padding:10px;color:#8892a8">Bloch sphere (full 3D surface)</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;color:#e2e8f0"><strong>Copying</strong></td>
+            <td style="padding:10px;color:#8892a8">✅ Can freely copy</td>
+            <td style="padding:10px;color:#8892a8">❌ No-cloning theorem prevents copying</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="concept-heading"><span class="concept-number">1</span> The NOT Gate — Where Classical Meets Quantum</div>
+      <div class="theory-text">
+        <p>The <strong>Pauli-X gate</strong> is the ONLY quantum gate in our simulator that has a direct classical equivalent — the NOT gate.</p><br>
+        <p><strong>Classical NOT:</strong> 0 → 1, 1 → 0. Always deterministic.</p><br>
+        <p><strong>Quantum X gate:</strong> |0⟩ → |1⟩, |1⟩ → |0⟩. Same behavior on basis states! But when applied to a superposition like |+⟩, the quantum version reveals its richer behavior — phases and amplitudes get swapped in a way classical bits simply cannot do.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="concept-heading"><span class="concept-number">2</span> Why Phase Matters (Z Gate)</div>
+      <div class="theory-text">
+        <p>The <strong>Z gate</strong> does nothing visible to a classical observer — if your qubit is in |0⟩, it stays |0⟩. If it's in |1⟩, it becomes −|1⟩, but P(1) = |−1|² = 1, so you still measure 1 with 100% probability.</p><br>
+        <p>So why does phase matter? Because in quantum algorithms, qubits <strong>interfere</strong> with each other. A phase change can make two quantum paths <strong>cancel out</strong> (destructive interference) or <strong>amplify</strong> each other (constructive interference). This is the basis of quantum speedups.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="text-align:center;padding:30px 20px;color:#555e74;font-size:12px">
+  Quantum Gate Operations Simulator — Physics Project<br>
+  Built with HTML, CSS &amp; JavaScript — No external libraries required
+</div>
+
+<script src="simulator.js"></script>
+</body>
+</html>

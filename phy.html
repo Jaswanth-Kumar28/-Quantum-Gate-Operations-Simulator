@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quantum Gate Operations Simulator</title>
+
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1a202c;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px solid #bee3f8;
+            border-radius: 20px;
+            padding: 3px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 18px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 18px 20px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #718096;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .input-btn {
+            padding: 10px 6px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f7fafc;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #2d3748;
+            transition: all 0.15s;
+        }
+
+        .input-btn:hover {
+            background: #ebf8ff;
+            border-color: #90cdf4;
+        }
+
+        .input-btn.active {
+            background: #ebf8ff;
+            border-color: #3182ce;
+            color: #2b6cb0;
+        }
+
+        .input-btn small {
+            display: block;
+            font-size: 10px;
+            font-family: sans-serif;
+            font-weight: 400;
+            color: #718096;
+            margin-top: 3px;
+        }
+
+        .gate-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .gate-btn {
+            padding: 12px 8px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f7fafc;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .gate-btn:hover {
+            background: #f0fff4;
+            border-color: #9ae6b4;
+        }
+
+        .gate-btn.active {
+            background: #f0fff4;
+            border-color: #38a169;
+        }
+
+        .gate-btn .gate-symbol {
+            font-size: 22px;
+            font-weight: 700;
+            color: #276749;
+        }
+
+        .gate-btn .gate-label {
+            font-size: 11px;
+            color: #4a5568;
+            margin-top: 3px;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        canvas#bloch {
+            display: block;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .amp-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .amp-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .amp-label {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            min-width: 120px;
+            color: #2d3748;
+        }
+
+        .bar-wrap {
+            flex: 1;
+            height: 24px;
+            background: #edf2f7;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: width 0.4s ease;
+            white-space: nowrap;
+        }
+
+        .amp-pct {
+            font-size: 12px;
+            font-family: monospace;
+            min-width: 38px;
+            text-align: right;
+            color: #718096;
+        }
+
+        .matrix-block {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+        }
+
+        .bracket {
+            font-size: 44px;
+            line-height: 1;
+            color: #4a5568;
+        }
+
+        .matrix-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 20px;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 16px;
+        }
+
+        .m-cell {
+            text-align: center;
+            color: #2d3748;
+        }
+
+        .info-box {
+            background: #fffbeb;
+            border-left: 3px solid #d69e2e;
+            border-radius: 0 8px 8px 0;
+            padding: 10px 14px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #744210;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 32px 1fr;
+            gap: 10px;
+            align-items: start;
+        }
+
+        .compare-col {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+
+        .compare-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #718096;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .compare-vs {
+            font-size: 13px;
+            font-weight: 700;
+            color: #a0aec0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding-top: 28px;
+        }
+
+        .bit-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .bit-in {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: monospace;
+        }
+
+        .bit-out {
+            font-family: monospace;
+            font-weight: 700;
+        }
+
+        .superposition-note {
+            font-size: 11px;
+            color: #718096;
+            font-style: italic;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .formula-card {
+            max-width: 1100px;
+            margin: 0 auto 18px;
+        }
+
+        .formula-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .formula-item {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .formula-item .f-title {
+            font-weight: 700;
+            color: #2b6cb0;
+            margin-bottom: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .formula-item code {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #1a202c;
+        }
+
+        #step-log {
+            max-height: 140px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: #1a202c;
+            color: #68d391;
+            border-radius: 8px;
+            padding: 10px 14px;
+            line-height: 1.8;
+        }
+
+        #step-log .log-title {
+            color: #90cdf4;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 720px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>⚛ Quantum Gate Operations Simulator</h1>
+        <p>Interactive Simulation of Single-Qubit Quantum Gates and State Transformations</p>
+        <span class="badge">Physics Project</span>
+    </header>
+
+    <div class="card formula-card">
+        <div class="formula-row">
+            <div class="formula-item">
+                <div class="f-title">Qubit state</div>
+                <code>|ψ⟩ = α|0⟩ + β|1⟩</code><br>
+                <small style="color:#718096">α, β are complex amplitudes</small>
+            </div>
+            <div class="formula-item">
+                <div class="f-title">Born rule (probability)</div>
+                <code>P(0) = |α|²,  P(1) = |β|²</code><br>
+                <small style="color:#718096">Total probability = 1</small>
+            </div>
+            <div class="formula-item">
+                <div class="f-title">Gate transformation</div>
+                <code>|ψ'⟩ = U|ψ⟩</code><br>
+                <small style="color:#718096">U is a 2×2 unitary matrix</small>
+            </div>
+            <div class="formula-item">
+                <div class="f-title">Normalization</div>
+                <code>|α|² + |β|² = 1</code><br>
+                <small style="color:#718096">Always satisfied after gate</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-grid">
+
+        <div class="left-panel">
+
+            <div class="card">
+                <div class="card-title">Step 1 — Choose input state |ψ⟩</div>
+                <div class="input-grid">
+                    <button class="input-btn active" id="in0" onclick="setInput(0)">
+                        |0⟩ <small>spin-up / OFF</small>
+                    </button>
+                    <button class="input-btn" id="in1" onclick="setInput(1)">
+                        |1⟩ <small>spin-down / ON</small>
+                    </button>
+                    <button class="input-btn" id="inp" onclick="setInput(2)">
+                        |+⟩ <small>superposition +</small>
+                    </button>
+                    <button class="input-btn" id="inm" onclick="setInput(3)">
+                        |−⟩ <small>superposition −</small>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Step 2 — Apply a gate</div>
+                <div class="gate-grid">
+                    <button class="gate-btn active" id="gX" onclick="selectGate('X')">
+                        <div class="gate-symbol">X</div>
+                        <div class="gate-label">Pauli-X (NOT)</div>
+                    </button>
+                    <button class="gate-btn" id="gY" onclick="selectGate('Y')">
+                        <div class="gate-symbol">Y</div>
+                        <div class="gate-label">Pauli-Y</div>
+                    </button>
+                    <button class="gate-btn" id="gZ" onclick="selectGate('Z')">
+                        <div class="gate-symbol">Z</div>
+                        <div class="gate-label">Pauli-Z</div>
+                    </button>
+                    <button class="gate-btn" id="gH" onclick="selectGate('H')">
+                        <div class="gate-symbol">H</div>
+                        <div class="gate-label">Hadamard</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Gate matrix (U)</div>
+                <div id="matrix-display"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Operation log</div>
+                <div id="step-log">
+                    <div class="log-title">> Quantum Terminal</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="right-panel">
+
+            <div class="card">
+                <div class="card-title">Bloch sphere — qubit state visualization</div>
+                <canvas id="bloch" width="700" height="240"></canvas>
+                <p style="font-size:11px;color:#718096;text-align:center;margin-top:6px">
+                    Every qubit state maps to a point on this sphere. |0⟩ = north pole, |1⟩ = south pole.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Output state |ψ'⟩ — measurement probabilities</div>
+                <div class="amp-rows" id="out-state"></div>
+                <div style="margin-top:14px" id="info-text"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Classical bit vs quantum qubit</div>
+                <div class="compare-grid" id="compare-grid"></div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+
+
+        function cx(re, im = 0) { return { re, im }; }
+
+        function abs2(z) { return z.re * z.re + z.im * z.im; }
+
+        function fmtC(z) {
+            const eps = 1e-9;
+            const r = Math.abs(z.re) < eps ? 0 : z.re;
+            const im = Math.abs(z.im) < eps ? 0 : z.im;
+            const f = v => {
+                if (Math.abs(v) < eps) return null;
+                if (Math.abs(Math.abs(v) - 1) < eps) return v < 0 ? '−1' : '1';
+                if (Math.abs(Math.abs(v) - 1 / Math.SQRT2) < eps) return v < 0 ? '−1/√2' : '1/√2';
+                return v.toFixed(2);
+            };
+            const rs = f(r), is = f(im);
+            if (!rs && !is) return '0';
+            if (!rs) return (im > 0 ? '' : '') + is + 'i';
+            if (!is) return rs;
+            return rs + (im > 0 ? '+' : '') + is + 'i';
+        }
+
+        function pct(z) { return Math.round(abs2(z) * 100); }
+
+
+
+        const GATES = {
+
+            X: {
+                name: 'Pauli-X Gate (Quantum NOT)',
+                matrix: [['0', '1'], ['1', '0']],
+                apply: ([a, b]) => [b, a],
+                info: '🔄 <strong>Pauli-X</strong> is the quantum NOT gate. It flips |0⟩ → |1⟩ and |1⟩ → |0⟩. It rotates the Bloch vector 180° around the X-axis.',
+                blochAxis: 'X-axis (180° rotation)',
+                classical: { desc: 'Direct equivalent: classical NOT gate', rows: [['0', '1'], ['1', '0']] }
+            },
+
+            Y: {
+                name: 'Pauli-Y Gate',
+                matrix: [['0', '−i'], ['i', '0']],
+                apply: ([a, b]) => [
+                    cx(-b.im, b.re),
+                    cx(a.im, -a.re)
+                ],
+                info: '🔁 <strong>Pauli-Y</strong> combines a bit-flip AND a phase-flip. No classical equivalent. Rotates the Bloch vector 180° around the Y-axis.',
+                blochAxis: 'Y-axis (180° rotation)',
+                classical: { desc: 'No classical analog (phase + bit flip)', rows: null }
+            },
+
+            Z: {
+                name: 'Pauli-Z Gate (Phase Gate)',
+                matrix: [['1', '0'], ['0', '−1']],
+                apply: ([a, b]) => [a, cx(-b.re, -b.im)],
+                info: '🌀 <strong>Pauli-Z</strong> leaves |0⟩ unchanged but maps |1⟩ → −|1⟩. This phase flip has no classical equivalent. It rotates the Bloch vector 180° around the Z-axis.',
+                blochAxis: 'Z-axis (180° rotation)',
+                classical: { desc: 'No classical equivalent (phase operation only)', rows: null }
+            },
+
+            H: {
+                name: 'Hadamard Gate (Superposition)',
+                matrix: [['1/√2', '1/√2'], ['1/√2', '−1/√2']],
+                apply: ([a, b]) => [
+                    cx((a.re + b.re) / Math.SQRT2, (a.im + b.im) / Math.SQRT2),
+                    cx((a.re - b.re) / Math.SQRT2, (a.im - b.im) / Math.SQRT2)
+                ],
+                info: '✨ <strong>Hadamard</strong> creates superposition: |0⟩ → |+⟩ and |1⟩ → |−⟩. Applying H twice returns to the original state. It is the key gate for quantum parallelism.',
+                blochAxis: 'X+Z axis (180° rotation)',
+                classical: { desc: 'No classical equivalent (creates quantum superposition!)', rows: null }
+            }
+        };
+
+
+
+        const INPUTS = [
+            [cx(1), cx(0)],
+            [cx(0), cx(1)],
+            [cx(1 / Math.SQRT2), cx(1 / Math.SQRT2)],
+            [cx(1 / Math.SQRT2), cx(-1 / Math.SQRT2)]
+        ];
+        const INPUT_LABELS = ['|0⟩', '|1⟩', '|+⟩', '|−⟩'];
+        const INPUT_IDS = ['in0', 'in1', 'inp', 'inm'];
+
+        let currentGate = 'X';
+        let currentInput = 0;
+        let logLines = [];
+
+
+
+        function setInput(i) {
+            currentInput = i;
+            INPUT_IDS.forEach((id, j) =>
+                document.getElementById(id).classList.toggle('active', j === i)
+            );
+            render();
+        }
+
+        function selectGate(g) {
+            currentGate = g;
+            ['X', 'Y', 'Z', 'H'].forEach(k =>
+                document.getElementById('g' + k).classList.toggle('active', k === g)
+            );
+            render();
+        }
+
+
+
+        function getBlochVector(state) {
+            const [a, b] = state;
+            const p0 = abs2(a), p1 = abs2(b);
+            const theta = 2 * Math.atan2(Math.sqrt(p1), Math.sqrt(p0));
+            let phi = 0;
+            if (p0 > 1e-9 && p1 > 1e-9) {
+                phi = Math.atan2(b.im, b.re) - Math.atan2(a.im, a.re);
+            } else if (p1 > 1e-9) {
+                phi = Math.atan2(b.im, b.re);
+            }
+            return {
+                x: Math.sin(theta) * Math.cos(phi),
+                y: Math.sin(theta) * Math.sin(phi),
+                z: Math.cos(theta)
+            };
+        }
+
+        function drawSphere(ctx, cx_px, cy_px, r, state, label, color) {
+            ctx.strokeStyle = 'rgba(100,120,160,0.18)';
+            ctx.lineWidth = 0.8;
+
+            ctx.beginPath();
+            ctx.arc(cx_px, cy_px, r, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.ellipse(cx_px, cy_px, r, r * 0.28, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.ellipse(cx_px, cy_px, r * 0.28, r, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            ctx.strokeStyle = 'rgba(100,120,160,0.35)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+
+            ctx.beginPath(); ctx.moveTo(cx_px, cy_px - r - 12); ctx.lineTo(cx_px, cy_px + r + 8); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx_px - r - 12, cy_px); ctx.lineTo(cx_px + r + 8, cy_px); ctx.stroke();
+
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#718096';
+            ctx.font = '11px Courier New, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('|0⟩', cx_px, cy_px - r - 16);
+            ctx.fillText('|1⟩', cx_px, cy_px + r + 18);
+            ctx.fillStyle = '#a0aec0';
+            ctx.font = '10px Courier New, monospace';
+            ctx.fillText('+X', cx_px + r + 18, cy_px + 4);
+            ctx.fillText('+Y', cx_px - r - 14, cy_px + 4);
+
+            const v = getBlochVector(state);
+
+            const sx = cx_px + v.x * r;
+            const sy = cy_px - v.z * r + v.y * r * 0.18;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(cx_px, cy_px);
+            ctx.lineTo(sx, sy);
+            ctx.stroke();
+
+            const angle = Math.atan2(sy - cy_px, sx - cx_px);
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(sx - 11 * Math.cos(angle - 0.38), sy - 11 * Math.sin(angle - 0.38));
+            ctx.lineTo(sx - 11 * Math.cos(angle + 0.38), sy - 11 * Math.sin(angle + 0.38));
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(sx, sy, 4.5, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            ctx.fillStyle = color;
+            ctx.font = '500 12px Segoe UI, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, cx_px, cy_px + r + 34);
+        }
+
+        function drawBloch(inputState, outputState) {
+            const canvas = document.getElementById('bloch');
+            const W = canvas.width, H = canvas.height;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, W, H);
+
+            const r = 84;
+
+            drawSphere(ctx, 175, H / 2, r, inputState, 'Input ' + INPUT_LABELS[currentInput], '#3182ce');
+
+            drawSphere(ctx, 520, H / 2, r, outputState, 'Output after ' + currentGate + ' gate', '#276749');
+
+            ctx.strokeStyle = '#a0aec0';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 4]);
+            ctx.beginPath();
+            ctx.moveTo(270, H / 2);
+            ctx.lineTo(400, H / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.beginPath();
+            ctx.moveTo(400, H / 2);
+            ctx.lineTo(390, H / 2 - 6);
+            ctx.lineTo(390, H / 2 + 6);
+            ctx.closePath();
+            ctx.fillStyle = '#a0aec0';
+            ctx.fill();
+
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '600 13px Segoe UI, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(currentGate + ' gate', 335, H / 2 - 12);
+            ctx.font = '11px Courier New, monospace';
+            ctx.fillStyle = '#718096';
+            ctx.fillText(GATES[currentGate].blochAxis, 335, H / 2 + 8);
+        }
+
+
+
+        function fmtStateLabel(state) {
+            const eps = 1e-6;
+            const [a, b] = state;
+            const p0 = abs2(a), p1 = abs2(b);
+
+            if (p0 > 1 - eps) return '|0⟩';
+            if (p1 > 1 - eps) return '|1⟩';
+
+            if (Math.abs(p0 - 0.5) < 0.01 && Math.abs(p1 - 0.5) < 0.01) {
+                if (b.re > 0 && Math.abs(b.im) < eps && a.re > 0) return '|+⟩  (superposition)';
+                if (b.re < 0 && Math.abs(b.im) < eps && a.re > 0) return '|−⟩  (superposition)';
+            }
+            return fmtC(a) + '|0⟩ + ' + fmtC(b) + '|1⟩';
+        }
+
+
+
+        function render() {
+            const gate = GATES[currentGate];
+            const inState = INPUTS[currentInput];
+            const outState = gate.apply(inState);
+
+            const colors = ['#3182ce', '#276749'];
+            const bgcols = ['#ebf8ff', '#f0fff4'];
+            const names = ['|0⟩', '|1⟩'];
+
+            document.getElementById('out-state').innerHTML = outState.map((amp, i) => {
+                const p = pct(amp);
+                const lbl = fmtC(amp) + '  ' + names[i];
+                return `
+        <div class="amp-row">
+          <span class="amp-label">${lbl}</span>
+          <div class="bar-wrap">
+            <div class="bar-fill"
+                 style="width:${p}%;background:${bgcols[i]};border:1px solid ${colors[i]}40;color:${colors[i]}">
+              ${p > 10 ? p + '%' : ''}
+            </div>
+          </div>
+          <span class="amp-pct">${p}%</span>
+        </div>`;
+            }).join('');
+
+            document.getElementById('info-text').innerHTML =
+                `<div class="info-box">${gate.info}</div>`;
+
+            const m = gate.matrix;
+            document.getElementById('matrix-display').innerHTML = `
+      <div style="font-size:12px;color:#718096;margin-bottom:8px">${gate.name}</div>
+      <div class="matrix-block">
+        <span class="bracket">[</span>
+        <div class="matrix-inner">
+          <div class="m-cell">${m[0][0]}</div>
+          <div class="m-cell">${m[0][1]}</div>
+          <div class="m-cell">${m[1][0]}</div>
+          <div class="m-cell">${m[1][1]}</div>
+        </div>
+        <span class="bracket">]</span>
+      </div>`;
+
+            const cl = gate.classical;
+            const classicalHTML = cl.rows
+                ? cl.rows.map(([inp, out]) =>
+                    `<div class="bit-row">
+            <span class="bit-in">${inp}</span>
+            <span style="color:#a0aec0">→</span>
+            <span class="bit-out" style="color:#3182ce">${out}</span>
+          </div>`).join('')
+                : `<div style="font-size:12px;color:#718096;font-style:italic;line-height:1.6">${cl.desc}</div>`;
+
+            const quantumHTML = `
+      <div class="bit-row">
+        <span class="bit-in" style="font-size:12px">${INPUT_LABELS[currentInput]}</span>
+        <span style="color:#a0aec0">→</span>
+        <span class="bit-out" style="color:#276749;font-size:12px">${fmtStateLabel(outState)}</span>
+      </div>
+      <div class="superposition-note">
+        Qubit can exist in superposition of |0⟩ and |1⟩<br>
+        until it is measured (collapses to one state)
+      </div>`;
+
+            document.getElementById('compare-grid').innerHTML = `
+      <div class="compare-col">
+        <div class="compare-title">Classical bit</div>
+        ${classicalHTML}
+      </div>
+      <div class="compare-vs">vs</div>
+      <div class="compare-col">
+        <div class="compare-title">Quantum qubit</div>
+        ${quantumHTML}
+      </div>`;
+
+            drawBloch(inState, outState);
+
+            const [a, b] = outState;
+            const logEntry =
+                `> ${INPUT_LABELS[currentInput]} — [${currentGate}] → ` +
+                `α=${fmtC(a)} (P=${pct(a)}%)  β=${fmtC(b)} (P=${pct(b)}%)`;
+
+            logLines.push(logEntry);
+            if (logLines.length > 20) logLines.shift();
+
+            const logEl = document.getElementById('step-log');
+            logEl.innerHTML = `<div class="log-title">> Quantum Terminal</div>` +
+                logLines.map(l => `<div>${l}</div>`).join('');
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+
+        render();
+
+    </script>
+
+</body>
+
+</html>
